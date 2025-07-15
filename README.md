@@ -40,6 +40,6 @@ Try the dashboard live on <a href="https://audreykchan-priceforecasting-price-to
 
 ```bash
 ├── price_tool.py          # Main Streamlit app
-├── pos_transactions.csv   # Sample anonymized POS data
+├── pos_transactions.csv   # Sample transaction data
 ├── requirements.txt       # Python dependencies
 └── README.md              # Project documentation
