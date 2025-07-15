@@ -6,7 +6,7 @@ from sklearn.linear_model import LinearRegression
 import io
 import base64
 
-st.title("Price Model + Revenue Forecasting")
+st.title("Price Model & Revenue Forecasting Dashboard")
 
 # Slider for price range
 price = st.slider("Set Price ($)", min_value=2.0, max_value=10.0, step=0.1, value=5.0)
