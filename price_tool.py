@@ -43,8 +43,43 @@ ax2.grid(True)
 
 st.pyplot(fig)
 
+# Aggregate rev by day
 # Load data
 df = pd.read_csv("pos_transactions.csv")
+df["day"] = pd.to_datetime(df["timestamp"])
+daily_df = df.groupby(df["day"].dt.date)["total_amount"].sum().reset_index()
+daily_df.columns = ["day", "total_revenue"]
+
+daily_df["day_index"] = (pd.to_datetime(daily_df["day"]) - pd.to_datetime(daily_df["day"]).min()).dt.days
+X = daily_df["day_index"].values.reshape(-1, 1)
+y = daily_df["total_revenue"].values
+
+model = LinearRegression()
+model.fit(X, y)
+
+future_indices = np.arange(X.max() + 1, X.max() + 8).reshape(-1, 1)
+future_dates = pd.date_range(daily_df["day"].max() + pd.Timedelta(days=1), periods=7)
+future_revenue = model.predict(future_indices)
+
+forecast_df = pd.DataFrame({
+    "day": future_dates,
+    "forecasted_revenue": future_revenue.round(2)
+})
+
+st.subheader("7-Day Revenue Forecast")
+st.dataframe(forecast_df)
+
+st.subheader("Forecasted vs. Historical Revenue")
+fig, ax = plt.subplots(figsize=(10, 4))
+ax.plot(daily_df["day"], daily_df["total_revenue"], label="Historical", marker="o")
+ax.plot(forecast_df["day"], forecast_df["forecasted_revenue"], label="Forecast", linestyle="--", marker="x", color="orange")
+ax.set_xlabel("Date")
+ax.set_ylabel("Revenue ($)")
+ax.set_title("Daily Revenue Forecast (Linear Regression)")
+ax.legend()
+ax.grid(True)
+st.pyplot(fig)
+
 
 # Category filter
 if "product_category" in df.columns:
@@ -57,7 +92,6 @@ else:
 st.header("Real Demand Curve from Transaction Data")
 
 # Price bins
-# GOOD — use the filtered data
 filtered_df["price_bin"] = pd.cut(filtered_df["unit_price"], bins=np.arange(2, 10.5, 0.5))
 
 elasticity_df = filtered_df.groupby("price_bin", observed=False).agg({
